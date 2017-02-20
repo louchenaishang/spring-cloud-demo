@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: eureka-client
+server:
+  port: 8080
+  undertow:
+    accesslog:
+      enabled: true
+eureka:
+  instance:
+    hostname: localhost
+    instanceId: ${spring.application.name}:${spring.application.instance_id:${server.port}}
+  client:
+    healthcheck:
+        enabled: true
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:8761/eureka/
