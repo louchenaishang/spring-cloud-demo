@@ -15,6 +15,7 @@
         <module>business-service-feign</module>
         <module>business-service-oauth2</module>
         <module>oauth2-server</module>
+        <module>zipkin-server</module>
     </modules>
 
     <dependencyManagement>
@@ -37,6 +38,13 @@
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-netflix</artifactId>
                 <version>1.3.0.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-sleuth</artifactId>
+                <version>1.2.0.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

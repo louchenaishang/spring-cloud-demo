@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: zipkin-server
+
+server:
+  port: 9411
+
+#security
+security:
+  basic:
+    enabled: false
+  user:
+    name: louchen
+    password: 123456
+
+#日志
+logging:
+  level:
+    root: info
