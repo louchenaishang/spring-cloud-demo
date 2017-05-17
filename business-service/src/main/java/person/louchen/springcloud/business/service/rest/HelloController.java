@@ -1,4 +1,4 @@
-package person.louchen.springcloud.eureka.client.rest;
+package person.louchen.springcloud.business.service.rest;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +13,7 @@ public class HelloController {
     @Value("${server.port}")
     protected String port;
 
-    @RequestMapping("/")
+    @RequestMapping("/hi")
     public String home() {
         return "port:" + port + ",Hello world";
     }
