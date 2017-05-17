@@ -1,17 +1,39 @@
 spring:
   application:
-    name: zipkin-server
+    name: zipkin-service
+  sleuth:
+    enabled: false
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
 
 server:
-  port: 9411
+  port: 9412
 
 #security
 security:
   basic:
-    enabled: false
+    enabled: true
   user:
     name: louchen
     password: 123456
+
+#eureka
+eureka:
+  server:
+    hostname: 127.0.0.1
+    username: louchen
+    password: 123456
+  instance:
+    prefer-ip-address: true
+    instanceId: ${spring.application.name}:${spring.cloud.client.ipAddress}:${server.port}
+  client:
+    healthcheck:
+        enabled: true
+    serviceUrl:
+      defaultZone: http://${eureka.server.username}:${eureka.server.password}@${eureka.server.hostname}:8761/eureka/
 
 #日志
 logging:
