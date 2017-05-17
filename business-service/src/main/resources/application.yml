@@ -4,7 +4,7 @@ spring:
     name: business-service
 
 server:
-  port: 8081
+  port: 8080
 
 #security
 security:

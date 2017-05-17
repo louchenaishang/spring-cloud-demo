@@ -13,6 +13,8 @@
         <module>eureka-server</module>
         <module>business-service</module>
         <module>business-service-feign</module>
+        <module>business-service-oauth2</module>
+        <module>oauth2-server</module>
     </modules>
 
     <dependencyManagement>

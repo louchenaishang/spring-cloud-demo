@@ -1,0 +1,26 @@
+#see http://docs.spring.io/spring-boot/docs/1.5.2.RELEASE/reference/html/common-application-properties.html
+spring:
+  application:
+    name: oauth2-server
+
+server:
+  port: 8060
+  contextPath: /uaa
+
+#security
+security:
+  basic:
+    enabled: true
+  user:
+    name: eric
+    password: 123456
+  oauth2:
+    client:
+      clientId: client
+      secret: secret
+  #http://localhost:8060/uaa/oauth/authorize?client_id=client&response_type=code&redirect_uri=http://www.baidu.com
+
+#日志
+logging:
+  level:
+    root: info
