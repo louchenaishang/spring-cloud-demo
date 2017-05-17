@@ -1,0 +1,46 @@
+#see http://docs.spring.io/spring-boot/docs/1.5.2.RELEASE/reference/html/common-application-properties.html
+spring:
+  application:
+    name: business-service-feign
+
+server:
+  port: 8090
+
+#eureka
+eureka:
+  server:
+    hostname: 127.0.0.1
+    username: louchen
+    password: 123456
+  instance:
+    prefer-ip-address: true
+    instanceId: ${spring.application.name}:${spring.cloud.client.ipAddress}:${server.port}
+  client:
+    healthcheck:
+        enabled: true
+    serviceUrl:
+      defaultZone: http://${eureka.server.username}:${eureka.server.password}@${eureka.server.hostname}:8761/eureka/
+
+#feign & hystrix
+feign:
+  hystrix:
+    enabled: true
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: true
+        isolation:
+          thread:
+            timeoutInMilliseconds: 5000
+
+#微服务账号密码
+microservice:
+  username: linyinan
+  password: 123456
+
+#日志
+logging:
+  level:
+    root: info

@@ -12,6 +12,7 @@
     <modules>
         <module>eureka-server</module>
         <module>business-service</module>
+        <module>business-service-feign</module>
     </modules>
 
     <dependencyManagement>
