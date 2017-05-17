@@ -1,6 +1,15 @@
 spring:
   application:
     name: zipkin-service
+  datasource:
+    schema: classpath:/zipkin.sql
+    url: jdbc:mysql://127.0.0.1:3306/zipkin?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+    username: root
+    password: 123456
+    # Switch this on to create the schema on startup:
+    initialize: false
+    continueOnError: true
+    driver-class-name: com.mysql.jdbc.Driver
   sleuth:
     enabled: false
   rabbitmq:
@@ -8,6 +17,10 @@ spring:
     port: 5672
     username: guest
     password: guest
+
+zipkin:
+  storage:
+    type: mysql
 
 server:
   port: 9412
