@@ -1,4 +1,4 @@
-package person.louchen.springcloud.business.service.config;
+package person.louchen.springcloud.business.config;
 
 import feign.auth.BasicAuthRequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;

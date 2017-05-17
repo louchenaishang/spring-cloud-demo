@@ -2,7 +2,7 @@ package person.louchen.springcloud.business.service.feign.remote;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import person.louchen.springcloud.business.service.config.CommonFeignConfiguration;
+import person.louchen.springcloud.business.config.CommonFeignConfiguration;
 import person.louchen.springcloud.business.service.feign.remote.fallback.HiServiceFallback;
 
 /**
