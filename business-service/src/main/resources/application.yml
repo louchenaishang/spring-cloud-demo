@@ -1,7 +1,7 @@
 #see http://docs.spring.io/spring-boot/docs/1.5.2.RELEASE/reference/html/common-application-properties.html
 spring:
   application:
-    name: business-service
+    name: business-service-${spring.cloud.config.profile}
   sleuth:
     sampler:
       percentage: 1.0

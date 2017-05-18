@@ -8,7 +8,7 @@ import person.louchen.springcloud.business.service.feign.remote.fallback.HiServi
 /**
  * Created by louchen on 2017/4/23.
  */
-@FeignClient(name = "business-service", fallback = HiServiceFallback.class, configuration = CommonFeignConfiguration.class)
+@FeignClient(name = "business-service-${spring.cloud.config.profile}", fallback = HiServiceFallback.class, configuration = CommonFeignConfiguration.class)
 public interface HiService {
 
     @RequestMapping(value = "/hi", method = RequestMethod.GET)
