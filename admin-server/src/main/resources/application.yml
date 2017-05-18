@@ -2,9 +2,20 @@
 spring:
   application:
     name: admin-service
+  boot:
+    admin:
+      username: ${security.user.name}       #These two are needed so that the client
+      password: ${security.user.password}   #can register at the protected server api
+      client:
+        metadata:
+          user.name: ${security.user.name}        #These two are needed so that the server
+          user.password: ${security.user.password}  #can access the proteceted client endpoints
+      routes:
+        endpoints: env,metrics,trace,dump,jolokia,info,configprops,trace,logfile,refresh,flyway,liquibase,heapdump,loggers,auditevents,hystrix.stream,activiti
 
 server:
   port: 8100
+
 
 #security
 security:
@@ -36,5 +47,7 @@ eureka:
 
 #日志
 logging:
+  file: ${spring.application.name}.log
+  path: .
   level:
     root: info

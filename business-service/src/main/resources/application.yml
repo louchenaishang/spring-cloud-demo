@@ -45,5 +45,7 @@ eureka:
 
 #日志
 logging:
+  file: ${spring.application.name}.log
+  path: .
   level:
     root: info
