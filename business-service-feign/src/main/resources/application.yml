@@ -57,4 +57,3 @@ microservice:
 logging:
   level:
     root: info
-    org.springframework.cloud.sleuth.zipkin: debug

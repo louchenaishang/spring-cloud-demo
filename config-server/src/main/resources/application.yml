@@ -1,28 +1,22 @@
 #see http://docs.spring.io/spring-boot/docs/1.5.2.RELEASE/reference/html/common-application-properties.html
 spring:
   application:
-    name: business-service
-  sleuth:
-    sampler:
-      percentage: 1.0
-  zipkin:
-    enabled: true
-    flush-interval: 1
-  rabbitmq:
-    host: 127.0.0.1
-    port: 5672
-    username: guest
-    password: guest
+    name: config-service
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/louchenaishang/spring-cloud-config-repo.git
 
 server:
-  port: 8080
+  port: 8888
 
 #security
 security:
   basic:
     enabled: true
   user:
-    name: linyinan
+    name: louchen
     password: 123456
 
 #eureka

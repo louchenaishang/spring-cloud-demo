@@ -13,9 +13,13 @@ public class HelloController {
     @Value("${server.port}")
     protected String port;
 
+    @Value("${cloud.author}")
+    protected String author;
+
+
     @RequestMapping("/hi")
     public String home() {
-        return "port:" + port + ",Hello world";
+        return "port:" + port + ",author:" + author + ",Hello world";
     }
 
 }
