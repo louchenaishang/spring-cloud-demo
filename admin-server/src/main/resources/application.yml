@@ -1,34 +1,15 @@
+#see http://docs.spring.io/spring-boot/docs/1.5.2.RELEASE/reference/html/common-application-properties.html
 spring:
   application:
-    name: zipkin-service
-  datasource:
-    schema: classpath:/zipkin.sql
-    url: jdbc:mysql://127.0.0.1:3306/zipkin?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false
-    username: root
-    password: 123456
-    # Switch this on to create the schema on startup:
-    initialize: false
-    continueOnError: true
-    driver-class-name: com.mysql.jdbc.Driver
-  sleuth:
-    enabled: false
-  rabbitmq:
-    host: 127.0.0.1
-    port: 5672
-    username: guest
-    password: guest
-
-zipkin:
-  storage:
-    type: mysql
+    name: admin-service
 
 server:
-  port: 9412
+  port: 8100
 
 #security
 security:
   basic:
-    enabled: true
+    enabled: false
   user:
     name: louchen
     password: 123456
@@ -43,9 +24,11 @@ eureka:
     username: louchen
     password: 123456
   instance:
+    leaseRenewalIntervalInSeconds: 10
     prefer-ip-address: true
     instanceId: ${spring.application.name}:${spring.cloud.client.ipAddress}:${server.port}
   client:
+    registryFetchIntervalSeconds: 5
     healthcheck:
         enabled: true
     serviceUrl:

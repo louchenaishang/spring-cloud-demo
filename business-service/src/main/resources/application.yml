@@ -24,6 +24,9 @@ security:
   user:
     name: linyinan
     password: 123456
+management:
+  security:
+    enabled: false
 
 #eureka
 eureka:
