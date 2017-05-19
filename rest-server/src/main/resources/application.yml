@@ -1,0 +1,14 @@
+#see http://docs.spring.io/spring-boot/docs/1.5.2.RELEASE/reference/html/common-application-properties.html
+spring:
+  application:
+    name: rest-server
+
+server:
+  port: 8600
+
+#日志
+logging:
+  file: ${spring.application.name}.log
+  path: .
+  level:
+    root: info
