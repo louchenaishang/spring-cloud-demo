@@ -4,6 +4,6 @@ spring:
       username: louchen
       password: 123456
       uri: http://127.0.0.1:8000
-      name: business-service,service,sleuth,rabbitmq,eureka,mysql,redis,session
+      name: zipkin,service,sleuth,rabbitmq,eureka,mysql,redis,session
       profile: dev
       label: master

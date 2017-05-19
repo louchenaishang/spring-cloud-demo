@@ -1,18 +1,19 @@
 #see http://docs.spring.io/spring-boot/docs/1.5.2.RELEASE/reference/html/common-application-properties.html
+
 spring:
   application:
     name: business-service-${spring.cloud.config.profile}
   sleuth:
     sampler:
-      percentage: 1.0
+      percentage: ${cloud.spring.sleuth.sampler.percentage}
   zipkin:
-    enabled: true
-    flush-interval: 1
+    enabled: ${cloud.spring.zipkin.enabled}
+    flush-interval: ${cloud.spring.zipkin.flush-interval}
   rabbitmq:
-    host: 127.0.0.1
-    port: 5672
-    username: guest
-    password: guest
+    host: ${cloud.spring.rabbitmq.host}
+    port: ${cloud.spring.rabbitmq.port}
+    username: ${cloud.spring.rabbitmq.username}
+    password: ${cloud.spring.rabbitmq.password}
 
 server:
   port: 8080
@@ -22,8 +23,8 @@ security:
   basic:
     enabled: true
   user:
-    name: linyinan
-    password: 123456
+    name: ${cloud.service.security.user.name}
+    password: ${cloud.service.security.user.password}
 management:
   security:
     enabled: false
@@ -31,15 +32,15 @@ management:
 #eureka
 eureka:
   server:
-    hostname: 127.0.0.1
-    username: louchen
-    password: 123456
+    hostname: ${cloud.eureka.server.hostname}
+    username: ${cloud.eureka.server.username}
+    password: ${cloud.eureka.server.password}
   instance:
-    prefer-ip-address: true
+    prefer-ip-address: ${cloud.eureka.instance.prefer-ip-address}
     instanceId: ${spring.application.name}:${spring.cloud.client.ipAddress}:${server.port}
   client:
     healthcheck:
-        enabled: true
+        enabled: ${cloud.eureka.client.healthcheck.enabled}
     serviceUrl:
       defaultZone: http://${eureka.server.username}:${eureka.server.password}@${eureka.server.hostname}:8761/eureka/
 
@@ -48,4 +49,4 @@ logging:
   file: ${spring.application.name}.log
   path: .
   level:
-    root: info
+    root: ${cloud.service.logging.level.root.info}

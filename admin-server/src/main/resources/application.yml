@@ -4,12 +4,12 @@ spring:
     name: admin-service
   boot:
     admin:
-      username: ${security.user.name}       #These two are needed so that the client
-      password: ${security.user.password}   #can register at the protected server api
+      username: ${cloud.service.security.user.name}     #These two are needed so that the client
+      password: ${cloud.service.security.user.password}   #can register at the protected server api
       client:
         metadata:
-          user.name: ${security.user.name}        #These two are needed so that the server
-          user.password: ${security.user.password}  #can access the proteceted client endpoints
+          user.name: ${cloud.service.security.user.name}        #These two are needed so that the server
+          user.password: ${cloud.service.security.user.password}  #can access the proteceted client endpoints
       routes:
         endpoints: env,metrics,trace,dump,jolokia,info,configprops,trace,logfile,refresh,flyway,liquibase,heapdump,loggers,auditevents,hystrix.stream,activiti
 
@@ -22,8 +22,8 @@ security:
   basic:
     enabled: false
   user:
-    name: louchen
-    password: 123456
+    name: ${cloud.service.security.user.name}
+    password: ${cloud.service.security.user.password}
 management:
   security:
     enabled: false
@@ -31,17 +31,17 @@ management:
 #eureka
 eureka:
   server:
-    hostname: 127.0.0.1
-    username: louchen
-    password: 123456
+    hostname: ${cloud.eureka.server.hostname}
+    username: ${cloud.eureka.server.username}
+    password: ${cloud.eureka.server.password}
   instance:
     leaseRenewalIntervalInSeconds: 10
-    prefer-ip-address: true
+    prefer-ip-address: ${cloud.eureka.instance.prefer-ip-address}
     instanceId: ${spring.application.name}:${spring.cloud.client.ipAddress}:${server.port}
   client:
     registryFetchIntervalSeconds: 5
     healthcheck:
-        enabled: true
+        enabled: ${cloud.eureka.client.healthcheck.enabled}
     serviceUrl:
       defaultZone: http://${eureka.server.username}:${eureka.server.password}@${eureka.server.hostname}:8761/eureka/
 
@@ -50,4 +50,4 @@ logging:
   file: ${spring.application.name}.log
   path: .
   level:
-    root: info
+    root: ${cloud.service.logging.level.root.info}

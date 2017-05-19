@@ -3,9 +3,9 @@ spring:
     name: zipkin-service
   datasource:
     schema: classpath:/zipkin.sql
-    url: jdbc:mysql://127.0.0.1:3306/zipkin?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&useSSL=false
-    username: root
-    password: 123456
+    url: ${cloud.zipkin.mysql.url}
+    username: ${cloud.zipkin.mysql.username}
+    password: ${cloud.zipkin.mysql.password}
     # Switch this on to create the schema on startup:
     initialize: false
     continueOnError: true
@@ -13,10 +13,11 @@ spring:
   sleuth:
     enabled: false
   rabbitmq:
-    host: 127.0.0.1
-    port: 5672
-    username: guest
-    password: guest
+      host: ${cloud.spring.rabbitmq.host}
+      port: ${cloud.spring.rabbitmq.port}
+      username: ${cloud.spring.rabbitmq.username}
+      password: ${cloud.spring.rabbitmq.password}
+
 
 zipkin:
   storage:
@@ -30,8 +31,8 @@ security:
   basic:
     enabled: true
   user:
-    name: louchen
-    password: 123456
+    name: ${cloud.service.security.user.name}
+    password: ${cloud.service.security.user.password}
 management:
   security:
     enabled: false
@@ -39,15 +40,15 @@ management:
 #eureka
 eureka:
   server:
-    hostname: 127.0.0.1
-    username: louchen
-    password: 123456
+    hostname: ${cloud.eureka.server.hostname}
+    username: ${cloud.eureka.server.username}
+    password: ${cloud.eureka.server.password}
   instance:
-    prefer-ip-address: true
+    prefer-ip-address: ${cloud.eureka.instance.prefer-ip-address}
     instanceId: ${spring.application.name}:${spring.cloud.client.ipAddress}:${server.port}
   client:
     healthcheck:
-        enabled: true
+        enabled: ${cloud.eureka.client.healthcheck.enabled}
     serviceUrl:
       defaultZone: http://${eureka.server.username}:${eureka.server.password}@${eureka.server.hostname}:8761/eureka/
 
@@ -56,4 +57,4 @@ logging:
   file: ${spring.application.name}.log
   path: .
   level:
-    root: info
+    root: ${cloud.service.logging.level.root.info}
