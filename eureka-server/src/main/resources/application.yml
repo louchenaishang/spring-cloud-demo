@@ -10,15 +10,15 @@ security:
   basic:
     enabled: true
   user:
-    name: louchen
-    password: 123456
+    name: ${cloud.eureka.server.username}
+    password: ${cloud.eureka.server.password}
 
 #eureka
 eureka:
-  environment: develop
+  environment: ${cloud.eureka.environment}
   instance:
-    hostname: 127.0.0.1
-    prefer-ip-address: true
+    hostname: ${cloud.eureka.server.hostname}
+    prefer-ip-address: ${cloud.eureka.instance.prefer-ip-address}
   client:
     registerWithEureka: false
     fetchRegistry: false
@@ -30,4 +30,4 @@ logging:
   file: ${spring.application.name}.log
   path: .
   level:
-    root: info
+    root: ${cloud.service.logging.level.root.info}

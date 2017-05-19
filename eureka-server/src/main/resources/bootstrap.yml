@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    config:
+      username: louchen
+      password: 123456
+      uri: http://127.0.0.1:8000
+      name: service,sleuth,rabbitmq,eureka,mysql,redis,session
+      profile: dev
+      label: master
