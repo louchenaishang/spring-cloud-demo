@@ -11,7 +11,10 @@ spring:
           password:
 
 server:
-  port: 8888
+  port: 8000
+
+encrypt:
+  key: chinano1
 
 #security
 security:
