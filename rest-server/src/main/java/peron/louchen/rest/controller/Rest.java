@@ -14,6 +14,11 @@ public class Rest {
         return "hi";
     }
 
+    @GetMapping("/user/hi")
+    public String user(){
+        return "user/hi";
+    }
+
 
     @GetMapping("/admin/hi")
     public String admin(){

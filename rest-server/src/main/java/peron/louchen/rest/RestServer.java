@@ -8,7 +8,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * Created by louchen on 2017/5/19.
@@ -24,10 +28,15 @@ public class RestServer {
     protected static class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         @Bean
+        public BCryptPasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
+        }
+
+        @Bean
         public UserDetailsService userDetailsService() {
             InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-            manager.createUser(User.withUsername("user").password("1").roles("USER").build());
-            manager.createUser(User.withUsername("admin").password("1").roles("USER","ADMIN").build());
+            manager.createUser(User.withUsername("user").password(passwordEncoder().encode("1")).roles("USER").build());
+            manager.createUser(User.withUsername("admin").password(passwordEncoder().encode("1")).roles("USER", "ADMIN").build());
             return manager;
         }
 
@@ -35,14 +44,20 @@ public class RestServer {
         protected void configure(HttpSecurity http) throws Exception {
             http
                     .authorizeRequests()
-                    .antMatchers("/**").hasRole("USER")
-                    .antMatchers("/admin/**").hasRole("ADMIN")
-                    .antMatchers("/anonymous/**").anonymous()
-                    .anyRequest().authenticated()
+                        .antMatchers("/user/**").hasRole("USER")
+                        .antMatchers("/admin/**").hasRole("ADMIN")
+                        .antMatchers("/anonymous/**").anonymous()
+                        .anyRequest().authenticated()
                     .and()
-                    .formLogin()
+                        .formLogin()
                     .and()
-                    .httpBasic();
+                        .httpBasic()
+                    .and()
+                    .logout()
+                        .invalidateHttpSession(true)
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .logoutSuccessHandler(new SimpleUrlLogoutSuccessHandler())
+                        .addLogoutHandler(new SecurityContextLogoutHandler());
         }
 
     }
