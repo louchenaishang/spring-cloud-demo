@@ -171,14 +171,14 @@ public class RestServer {
 //            return manager;
 //        }
 
-
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http
                     .authorizeRequests()
-                        .antMatchers("/user/**").hasRole("USER")
+                        .antMatchers("/anonymous/**").permitAll()
+                        .antMatchers("/public/**").permitAll()
                         .antMatchers("/admin/**").hasRole("ADMIN")
-                        .antMatchers("/anonymous/**").anonymous()
+                        .antMatchers("/**").hasRole("USER")
                         .anyRequest().authenticated()
                     .and()
                         .formLogin()
