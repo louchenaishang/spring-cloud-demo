@@ -1,14 +1,24 @@
 package peron.louchen.rest;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
+import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,9 +32,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +45,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by louchen on 2017/5/19.
@@ -100,7 +115,14 @@ public class RestServer {
 
         }
 
+        @Service
         protected static class CustomUserDetailsService implements UserDetailsService {
+
+            @Autowired
+            private LoginAttemptService loginAttemptService;
+
+            @Autowired
+            private HttpServletRequest request;
 
             private static final Map<String,CustomUserDetails> Users = new HashMap<>();
 
@@ -111,6 +133,11 @@ public class RestServer {
 
             @Override
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+                String ip = request.getRemoteAddr();
+                if (loginAttemptService.isBlocked(ip)) {
+                    throw new UsernameNotFoundException("ip blocked");
+                }
+
                 CustomUserDetails user = Users.get(username);
                 if(user==null){
                     throw new UsernameNotFoundException("Username not found");
@@ -120,12 +147,14 @@ public class RestServer {
 
         }
 
+        @Component
         protected static class CustomAuthenticationProvider  implements AuthenticationProvider {
 
             private UserDetailsService userDetailsService;
 
             public CustomAuthenticationProvider(){}
 
+            @Autowired
             public CustomAuthenticationProvider(UserDetailsService userDetailsService){
                 this.userDetailsService = userDetailsService;
             }
@@ -151,6 +180,7 @@ public class RestServer {
 
         }
 
+        @Component
         protected static class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler{
 
             @Override
@@ -162,6 +192,7 @@ public class RestServer {
 
         }
 
+        @Component
         protected static class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint{
 
             @Override
@@ -173,24 +204,76 @@ public class RestServer {
 
         }
 
-        @Bean
-        public UserDetailsService userDetailsService(){
-            return new CustomUserDetailsService();
+        @Service
+        protected static class LoginAttemptService {
+
+            private Logger logger = LoggerFactory.getLogger(this.getClass());
+            private final int MAX_ATTEMPT = 5;
+            private LoadingCache<String, Integer> attemptsCache;
+
+            public LoginAttemptService() {
+                super();
+                attemptsCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).build(new CacheLoader<String, Integer>() {
+                    public Integer load(String key) {
+                        return 0;
+                    }
+                });
+            }
+
+            public void loginSucceeded(String key) {
+                attemptsCache.invalidate(key);
+            }
+
+            public void loginFailed(String key) {
+                int attempts = 0;
+                try {
+                    attempts = attemptsCache.get(key);
+                } catch (ExecutionException e) {
+                    attempts = 0;
+                }
+                attempts++;
+                attemptsCache.put(key, attempts);
+                if(attempts>=3){
+                    logger.warn("ip:{},login failed attempt:{}",key,attempts);
+                }else{
+                    logger.info("ip:{},login failed attempt:{}",key,attempts);
+                }
+            }
+
+            public boolean isBlocked(String key) {
+                try {
+                    return attemptsCache.get(key) >= MAX_ATTEMPT;
+                } catch (ExecutionException e) {
+                    return true;
+                }
+            }
+
         }
 
-        @Bean
-        public AuthenticationProvider authenticationProvider(){
-            return new CustomAuthenticationProvider(userDetailsService());
+        @Component
+        public class AuthenticationFailureListener implements ApplicationListener<AuthenticationFailureBadCredentialsEvent> {
+
+            @Autowired
+            private LoginAttemptService loginAttemptService;
+
+            public void onApplicationEvent(AuthenticationFailureBadCredentialsEvent e) {
+                WebAuthenticationDetails auth = (WebAuthenticationDetails) e.getAuthentication().getDetails();
+                loginAttemptService.loginFailed(auth.getRemoteAddress());
+            }
+
         }
 
-        @Bean
-        public AuthenticationFailureHandler authenticationFailureHandler(){
-            return new CustomAuthenticationFailureHandler();
-        }
+        @Component
+        public class AuthenticationSuccessEventListener implements ApplicationListener<AuthenticationSuccessEvent> {
 
-        @Bean
-        public AuthenticationEntryPoint authenticationEntryPoint(){
-            return new CustomAuthenticationEntryPoint();
+            @Autowired
+            private LoginAttemptService loginAttemptService;
+
+            public void onApplicationEvent(AuthenticationSuccessEvent e) {
+                WebAuthenticationDetails auth = (WebAuthenticationDetails) e.getAuthentication().getDetails();
+                loginAttemptService.loginSucceeded(auth.getRemoteAddress());
+            }
+
         }
 
 //        @Bean
@@ -205,6 +288,20 @@ public class RestServer {
 //            manager.createUser(User.withUsername("admin").password(passwordEncoder().encode("1")).roles("USER", "ADMIN").build());
 //            return manager;
 //        }
+
+        @Autowired
+        private AuthenticationProvider authenticationProvider;
+
+        @Autowired
+        private AuthenticationFailureHandler authenticationFailureHandler;
+
+        @Autowired
+        private AuthenticationEntryPoint authenticationEntryPoint;
+
+        @Override
+        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+            auth.authenticationProvider(authenticationProvider);
+        }
 
         @Override
         public void configure(WebSecurity web) throws Exception {
@@ -225,10 +322,10 @@ public class RestServer {
                         .formLogin()
                             .usernameParameter("username")
                             .passwordParameter("password")
-                            .failureHandler(authenticationFailureHandler())
+                            .failureHandler(authenticationFailureHandler)
                     .and()
                         .exceptionHandling()
-                            .authenticationEntryPoint(authenticationEntryPoint())
+                            .authenticationEntryPoint(authenticationEntryPoint)
                     .and()
                         .logout()
                             .invalidateHttpSession(true)
