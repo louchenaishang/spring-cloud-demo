@@ -2,6 +2,11 @@
 spring:
   application:
     name: rest-server
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 server:
   port: 8600

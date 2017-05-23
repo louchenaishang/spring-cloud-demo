@@ -2,31 +2,35 @@ package peron.louchen.rest;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -147,6 +151,27 @@ public class RestServer {
 
         }
 
+        protected static class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler{
+
+            @Override
+            public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException authenticationException) throws IOException, ServletException {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                PrintWriter writer = response.getWriter();
+                writer.println("HTTP Status 401 : " + authenticationException.getMessage());
+            }
+
+        }
+
+        protected static class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint{
+
+            @Override
+            public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authenticationException) throws IOException, ServletException {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                PrintWriter writer = response.getWriter();
+                writer.println("HTTP Status 401 : " + authenticationException.getMessage());
+            }
+
+        }
 
         @Bean
         public UserDetailsService userDetailsService(){
@@ -156,6 +181,16 @@ public class RestServer {
         @Bean
         public AuthenticationProvider authenticationProvider(){
             return new CustomAuthenticationProvider(userDetailsService());
+        }
+
+        @Bean
+        public AuthenticationFailureHandler authenticationFailureHandler(){
+            return new CustomAuthenticationFailureHandler();
+        }
+
+        @Bean
+        public AuthenticationEntryPoint authenticationEntryPoint(){
+            return new CustomAuthenticationEntryPoint();
         }
 
 //        @Bean
@@ -172,8 +207,14 @@ public class RestServer {
 //        }
 
         @Override
+        public void configure(WebSecurity web) throws Exception {
+            web.ignoring().antMatchers(HttpMethod.OPTIONS, "/**");
+        }
+
+        @Override
         protected void configure(HttpSecurity http) throws Exception {
             http
+                    .csrf().disable()
                     .authorizeRequests()
                         .antMatchers("/anonymous/**").permitAll()
                         .antMatchers("/public/**").permitAll()
@@ -182,14 +223,18 @@ public class RestServer {
                         .anyRequest().authenticated()
                     .and()
                         .formLogin()
+                            .usernameParameter("username")
+                            .passwordParameter("password")
+                            .failureHandler(authenticationFailureHandler())
                     .and()
-                        .httpBasic()
+                        .exceptionHandling()
+                            .authenticationEntryPoint(authenticationEntryPoint())
                     .and()
-                    .logout()
-                        .invalidateHttpSession(true)
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                        .logoutSuccessHandler(new SimpleUrlLogoutSuccessHandler())
-                        .addLogoutHandler(new SecurityContextLogoutHandler());
+                        .logout()
+                            .invalidateHttpSession(true)
+                            .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                            .logoutSuccessHandler(new SimpleUrlLogoutSuccessHandler())
+                            .addLogoutHandler(new SecurityContextLogoutHandler());
         }
 
     }
