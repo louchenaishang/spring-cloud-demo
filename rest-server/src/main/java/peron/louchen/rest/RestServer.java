@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -118,12 +117,6 @@ public class RestServer {
         @Service
         protected static class CustomUserDetailsService implements UserDetailsService {
 
-            @Autowired
-            private LoginAttemptService loginAttemptService;
-
-            @Autowired
-            private HttpServletRequest request;
-
             private static final Map<String,CustomUserDetails> Users = new HashMap<>();
 
             static {
@@ -133,11 +126,6 @@ public class RestServer {
 
             @Override
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-                String ip = request.getRemoteAddr();
-                if (loginAttemptService.isBlocked(ip)) {
-                    throw new UsernameNotFoundException("ip blocked");
-                }
-
                 CustomUserDetails user = Users.get(username);
                 if(user==null){
                     throw new UsernameNotFoundException("Username not found");
@@ -150,17 +138,22 @@ public class RestServer {
         @Component
         protected static class CustomAuthenticationProvider  implements AuthenticationProvider {
 
+            @Autowired
             private UserDetailsService userDetailsService;
 
-            public CustomAuthenticationProvider(){}
+            @Autowired
+            private LoginAttemptService loginAttemptService;
 
             @Autowired
-            public CustomAuthenticationProvider(UserDetailsService userDetailsService){
-                this.userDetailsService = userDetailsService;
-            }
+            private HttpServletRequest request;
 
             @Override
             public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+                String ip = request.getRemoteAddr();
+                if (loginAttemptService.isBlocked(ip)) {
+                    throw new BadCredentialsException("ip blocked");
+                }
+
                 UsernamePasswordAuthenticationToken token = (UsernamePasswordAuthenticationToken) authentication;
                 UserDetails userDetails = userDetailsService.loadUserByUsername(token.getName());
                 if (userDetails == null) {
