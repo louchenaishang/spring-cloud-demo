@@ -1,4 +1,7 @@
 #see http://docs.spring.io/spring-boot/docs/1.5.2.RELEASE/reference/html/common-application-properties.html
+info:
+  version: "${project.version}"
+
 spring:
   application:
     name: business-service-oauth2
