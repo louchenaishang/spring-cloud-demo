@@ -6,7 +6,10 @@
 <html lang="en">
 
 <body>
-777788
+<form id="form_welcome" action="${pageContext.request.contextPath}/pay/pay.jsp"
+      method="post" target="_self" accept-charset="utf-8">
+   form_welcome,<input type="submit">
+</form>
 </body>
 
 </html>
