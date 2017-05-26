@@ -19,6 +19,7 @@
         <module>config-server</module>
         <module>admin-server</module>
         <module>rest-server</module>
+        <module>jsp-server</module>
     </modules>
 
     <properties>

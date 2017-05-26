@@ -1,0 +1,25 @@
+info:
+  version: "${project.version}"
+
+spring:
+  application:
+    name: jsp-server
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+
+server:
+  port: 8080
+
+#security
+security:
+  basic:
+    enabled: false
+
+#日志
+logging:
+  file: ${spring.application.name}.log
+  path: .
+  level:
+    root: info
