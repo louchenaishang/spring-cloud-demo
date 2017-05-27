@@ -15,7 +15,7 @@ import java.util.Map;
 @Controller
 public class HelloController {
 
-    @Value("${cloud.service.security.user.name}")
+    @Value("${cloud.service.security.user.name:default}")
     private String msg;
 
     @RequestMapping("/hello")
