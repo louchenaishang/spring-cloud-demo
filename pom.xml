@@ -20,10 +20,12 @@
         <module>admin-server</module>
         <module>rest-server</module>
         <module>jsp-server</module>
+        <module>rest-jwt-server</module>
     </modules>
 
     <properties>
         <springboot-admin.version>1.5.0</springboot-admin.version>
+        <jjwt.version>0.7.0</jjwt.version>
     </properties>
 
     <dependencyManagement>
